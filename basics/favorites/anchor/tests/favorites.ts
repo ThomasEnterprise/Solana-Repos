@@ -6,6 +6,8 @@ import type { Favorites } from '../target/types/favorites';
 import { systemProgramErrors } from './system-errors';
 const web3 = anchor.web3;
 
+const SECONDS = 1000;
+
 describe('Favorites', () => {
   // Use the cluster and the keypair from Anchor.toml
   const provider = anchor.AnchorProvider.env();
@@ -49,20 +51,18 @@ describe('Favorites', () => {
     assert.equal(dataFromPda.number.toString(), favoriteNumber.toString());
     // And check the hobbies too
     assert.deepEqual(dataFromPda.hobbies, favoriteHobbies);
-  });
+  }).slow(4 * SECONDS);
 
   it('Updates the favorites', async () => {
     const newFavoriteHobbies = ['skiing', 'skydiving', 'biking', 'swimming'];
     try {
       const signature = await program.methods.setFavorites(favoriteNumber, favoriteColor, newFavoriteHobbies).signers([user]).rpc();
-
-      console.log(`Transaction signature: ${signature}`);
     } catch (error) {
       console.error((error as Error).message);
       const customErrorMessage = getCustomErrorMessage(systemProgramErrors, error);
       throw new Error(customErrorMessage);
     }
-  });
+  }).slow(4 * SECONDS);
 
   it('Rejects transactions from unauthorized signers', async () => {
     try {
@@ -77,5 +77,5 @@ describe('Favorites', () => {
       const errorMessage = (error as Error).message;
       assert.isTrue(errorMessage.includes('unknown signer'));
     }
-  });
+  }).slow(4 * SECONDS);
 });
